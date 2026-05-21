@@ -35,7 +35,7 @@ This POC is live at **https://nobodycaresworkharder.me**.
 |---|---|
 | Domain registrar / DNS | GoDaddy (apex A records → Akamai edge IPs; `www` CNAME → `nobodycaresworkharder.me.edgekey.net`) |
 | CDN / edge logic | Akamai property `nobodycaresworkharder.me` (Dynamic Site Accelerator) |
-| EdgeWorker | `edgeworker-orchestrator/` v1.1.0 — traffic gatekeeper |
+| EdgeWorker | `edgeworker-orchestrator/` v1.0.0 — traffic gatekeeper |
 | Origin | Linode Object Storage bucket `serverless-ai-seo-pipeline` (region `us-ord-1`, static website hosting) |
 | TLS | Akamai CPS Enhanced TLS, SAN cert covering apex + www |
 | Compute | Fermyon Spin Wasm function at `https://bede2402-c4b7-4234-b17c-5e04fc46ef00.fwf.app` |
@@ -192,11 +192,9 @@ To add a new fixture: save the HTML, upload it to the bucket with `s3cmd put --a
 
 This is a POC, not a production-grade product. When demoing to customers, be transparent about these points:
 
-1. **No edge cache on returning bots.** The current implementation generates the Markdown response via `request.respondWith()` from `onClientRequest`. Akamai does not cache `respondWith()` responses automatically, so the Wasm function runs on every bot request. Moving the conversion to a `responseProvider` event handler enables real edge caching with sub-50ms TCP_HIT responses — that's a one-day refactor, not an architectural rewrite.
+1. **No real bot verification.** The pipeline triggers on the `X-Verified-Bot: true` request header, which any client can spoof. In a production deployment, Akamai Bot Manager (separately licensed) sets that header only for cryptographically verified crawlers (GPTBot, ClaudeBot, etc.). The POC demo simulates this by sending the header directly from the demo UI.
 
-2. **No real bot verification.** The pipeline triggers on the `X-Verified-Bot: true` request header, which any client can spoof. In a production deployment, Akamai Bot Manager (separately licensed) sets that header only for cryptographically verified crawlers (GPTBot, ClaudeBot, etc.). The POC demo simulates this by sending the header directly from the demo UI.
-
-3. **Wasm response truncation.** The EdgeWorker reads the Wasm response up to 100,000 bytes and truncates the final output to 1,900 characters before calling `respondWith()`. This works around the EdgeWorker memory limit on synthesized responses. A `responseProvider` rewrite would remove this constraint.
+2. **No pre-rendered cache.** Returning bot requests are served from the Akamai CDN cache (`Cache-Control: max-age=3600, public`) rather than a pre-populated store. The first request to any URL still runs the full Wasm pipeline; subsequent requests within the TTL are served as CDN HITs.
 
 ---
 
