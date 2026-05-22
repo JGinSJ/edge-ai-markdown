@@ -29,13 +29,13 @@ This pipeline intercepts AI bot requests at the Akamai edge and handles the HTML
 
 ## Production Deployment
 
-This POC is live at **https://nobodycaresworkharder.me**.
+This POC is live at **https://stopwaitingshipit.com**.
 
 | Component | Implementation |
 |---|---|
-| Domain registrar / DNS | GoDaddy (apex A records → Akamai edge IPs; `www` CNAME → `nobodycaresworkharder.me.edgekey.net`) |
-| CDN / edge logic | Akamai property `nobodycaresworkharder.me` (Dynamic Site Accelerator) |
-| EdgeWorker | `edgeworker-orchestrator/` v1.0.0 — traffic gatekeeper |
+| Domain registrar / DNS | GoDaddy (apex A records → Akamai edge IPs; `www` CNAME → `stopwaitingshipit.com.edgekey.net`) |
+| CDN / edge logic | Akamai property `stopwaitingshipit.com` (Dynamic Site Accelerator) |
+| EdgeWorker | `edgeworker-orchestrator/` v1.0.0 (ID `108291`) — traffic gatekeeper |
 | Origin | Linode Object Storage bucket `serverless-ai-seo-pipeline` (region `us-ord-1`, static website hosting) |
 | TLS | Akamai CPS Enhanced TLS, SAN cert covering apex + www |
 | Compute | Fermyon Spin Wasm function at `https://bede2402-c4b7-4234-b17c-5e04fc46ef00.fwf.app` |
@@ -49,7 +49,7 @@ The Akamai property has a single `AI Bot Interception` child rule under the Defa
 ```
 edge-ai-markdown/
 ├── edgeworker-orchestrator/
-│   ├── main.js          # Akamai EdgeWorker (v1.1.0) — traffic gatekeeper
+│   ├── main.js          # Akamai EdgeWorker (v1.0.0) — traffic gatekeeper
 │   └── bundle.json      # EdgeWorker manifest
 ├── akamai-ai-markdown/
 │   ├── src/lib.rs       # Rust/Wasm HTTP component — fetches HTML, returns Markdown
@@ -89,7 +89,7 @@ Open the URL printed in the console. The UI presents five demo pages (Tier 1 Tel
 
 - **Scenario A — Human Visitor.** Standard browser request. Served HTML from the Linode origin via Akamai. EdgeWorker does not run.
 - **Scenario B — AI Crawler, First Visit.** `X-Verified-Bot: true` header triggers the EdgeWorker, which calls the Wasm function. Returns clean Markdown with token counts measured live.
-- **Scenario C — AI Crawler, Returns.** Same bot request again. In this POC the EdgeWorker re-runs the Wasm function (see Limitations below).
+- **Scenario C — AI Crawler, Returns.** Same bot request again. Served as a CDN HIT from the Akamai cache — the Wasm function does not re-run.
 
 The UI surfaces three business-oriented metrics per page:
 
@@ -125,7 +125,7 @@ Add these to `~/.zshrc` so you can lock/unlock the origin bucket between demos:
 # WorkHarder demo bucket toggle
 alias demo-lock='s3cmd setpolicy ~/.workharder/lockdown-policy.json s3://serverless-ai-seo-pipeline --host=us-ord-1.linodeobjects.com "--host-bucket=%(bucket)s.us-ord-1.linodeobjects.com" && echo "🔒 Bucket locked"'
 alias demo-unlock='s3cmd delpolicy s3://serverless-ai-seo-pipeline --host=us-ord-1.linodeobjects.com "--host-bucket=%(bucket)s.us-ord-1.linodeobjects.com" && echo "🔓 Bucket open"'
-alias demo-check='curl -sI http://serverless-ai-seo-pipeline.website-us-ord-1.linodeobjects.com/index.html | head -1'
+alias demo-check='curl -sI https://stopwaitingshipit.com/ | head -1'
 ```
 
 The lockdown policy file (`~/.workharder/lockdown-policy.json`):
@@ -158,7 +158,7 @@ spin deploy
 ```bash
 cd edgeworker-orchestrator
 tar -czvf bundle.tgz bundle.json main.js
-# Upload via Akamai Control Center → EdgeWorkers → [your EdgeWorker ID] → Create Version
+# Upload via Akamai Control Center → EdgeWorkers → 108291 → Create Version
 # Activate on Staging, test, then activate on Production
 ```
 
@@ -204,16 +204,16 @@ For a quick end-to-end smoke test without the demo UI:
 
 ```bash
 # Human request — should return text/html
-curl -sI https://nobodycaresworkharder.me/ \
+curl -sI https://stopwaitingshipit.com/ \
   | grep -iE "^HTTP|content-type"
 
 # Bot request — should return text/markdown + x-wasm-execution: success
-curl -sI -H "X-Verified-Bot: true" https://nobodycaresworkharder.me/ \
+curl -sI -H "X-Verified-Bot: true" https://stopwaitingshipit.com/ \
   | grep -iE "^HTTP|content-type|x-wasm"
 
 # Bot request against a specific fixture
 curl -sI -H "X-Verified-Bot: true" \
-  https://nobodycaresworkharder.me/telco-iPhone-17-Pro-Max.html \
+  https://stopwaitingshipit.com/telco-iPhone-17-Pro-Max.html \
   | grep -iE "^HTTP|content-type|x-wasm"
 ```
 
