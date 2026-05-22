@@ -4,6 +4,15 @@ const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
 
+// Load .env from project root (no dotenv dependency)
+try {
+    const envFile = fs.readFileSync(path.join(__dirname, '..', '.env'), 'utf8');
+    for (const line of envFile.split('\n')) {
+        const m = line.match(/^([^#=\s][^=]*)=(.*)$/);
+        if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim();
+    }
+} catch { /* .env is optional */ }
+
 const PORT          = 8080;
 const TIMEOUT_MS    = 20000;
 
