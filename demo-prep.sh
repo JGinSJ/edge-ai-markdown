@@ -7,7 +7,7 @@
 set -uo pipefail
 
 # ─── Config ──────────────────────────────────────────────────────────────────
-DOMAIN="nobodycaresworkharder.me"
+DOMAIN="stopwaitingshipit.com"
 BUCKET_ORIGIN="http://serverless-ai-seo-pipeline.website-us-ord-1.linodeobjects.com"
 WASM_URL="https://bede2402-c4b7-4234-b17c-5e04fc46ef00.fwf.app"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

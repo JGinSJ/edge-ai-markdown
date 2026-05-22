@@ -1,4 +1,4 @@
-# DEMO-PREP — Serverless AI-SEO Pipeline
+# DEMO-PREP — Edge AI Markdown
 
 Run this checklist **10 minutes before** every customer call.
 
@@ -44,14 +44,11 @@ To hide a page for a specific call, remove its entry from `demo-ui/fixtures.json
 
 ## 4. Known POC caveats — acknowledge these in-demo, don't hide them
 
-**Caching (Scenario C shows Cache Miss, not Cache Hit)**
-The EdgeWorker runs on `onClientRequest`, which fires before Akamai's cache layer. Production-grade caching requires moving the Wasm call into `responseProvider` so Akamai can store the Markdown output. That's a 1–2 sprint refactor, not an architecture change. Frame it: *"We left the cache transparent so you can watch the full pipeline execute live."*
-
 **Header-based bot trigger**
 The demo uses `X-Verified-Bot: true` set by Akamai's Bot Manager property rule. In production this header is injected by the platform for verified crawlers — GPTBot, ClaudeBot, PerplexityBot. It is not something an end user or attacker can spoof to get Markdown instead of HTML. The demo UI adds the header client-side to simulate verified bot traffic.
 
-**Response truncation**
-The Wasm function appends `...[MARKDOWN TRUNCATED FOR EDGEWORKER DEMO]...` at the end of the Markdown sample. This is intentional — the EdgeWorker has a 128 KB response body limit. Production implementations would either stream or paginate. The token metrics in the UI are pre-computed from full fixture files and are not affected by truncation.
+**No pre-rendered cache**
+Returning bot requests (Scenario C) are served from the Akamai CDN cache rather than a pre-populated store. The first request to any URL runs the full Wasm pipeline; subsequent requests within the 1-hour TTL are served as CDN HITs with no origin or compute involvement.
 
 ---
 

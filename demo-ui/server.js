@@ -9,7 +9,7 @@ const TIMEOUT_MS    = 20000;
 
 // Target mode: set AKAMAI_TARGET=production to route tests through the live
 // nobodycaresworkharder.me property instead of the staging edge.
-const PRODUCTION_HOST = 'nobodycaresworkharder.me';
+const PRODUCTION_HOST = 'stopwaitingshipit.com';
 const STAGING_HOST    = 'cdi.connected-cloud.io.edgesuite-staging.net';
 const HOST_HEADER     = 'cdi.connected-cloud.io';
 const TEST_PATH       = '/ai-seo-test';
@@ -790,6 +790,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-    console.log('\n  Serverless AI-SEO Pipeline — Demo UI');
+    console.log('\n  Edge AI Markdown — Demo UI');
     console.log(`  http://localhost:${PORT}\n`);
 });

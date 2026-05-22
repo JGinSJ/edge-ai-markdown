@@ -12,3 +12,6 @@ demo-ui/snippets-logs.log
 
 # Local-only fixture variants (full reference copy kept off-repo)
 demo-ui/fixtures.full.json
+
+# Claude Code local settings
+.claude/
