@@ -10,9 +10,9 @@ const TIMEOUT_MS    = 20000;
 // Target mode: set AKAMAI_TARGET=production to route tests through the live
 // nobodycaresworkharder.me property instead of the staging edge.
 const PRODUCTION_HOST = 'stopwaitingshipit.com';
-const STAGING_HOST    = 'cdi.connected-cloud.io.edgesuite-staging.net';
-const HOST_HEADER     = 'cdi.connected-cloud.io';
-const TEST_PATH       = '/ai-seo-test';
+const STAGING_HOST    = 'stopwaitingshipit.com.edgekey-staging.net';
+const HOST_HEADER     = 'stopwaitingshipit.com';
+const TEST_PATH       = '/';
 
 const PRODUCTION_MODE = (process.env.AKAMAI_TARGET || '').toLowerCase() === 'production';
 
@@ -28,7 +28,7 @@ const { get_encoding } = require('tiktoken');
 const enc = get_encoding('cl100k_base');
 enc.encode('warmup'); // pre-load WASM binary so the first demo run isn't slow
 
-const WASM_URL     = 'https://bede2402-c4b7-4234-b17c-5e04fc46ef00.fwf.app';
+const WASM_URL     = process.env.WASM_URL ?? '';
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 
 function countTokens(text) {

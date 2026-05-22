@@ -1,7 +1,6 @@
 [package]
 name = "akamai-ai-markdown"
-authors = ["Jorge G <233847607+jgeronim@users.noreply.github.com>"]
-description = "akamai-ai-markdown"
+description = "Rust/Wasm HTTP component — fetches a URL and converts HTML to Markdown"
 version = "0.1.0"
 rust-version = "1.78"
 edition = "2021"

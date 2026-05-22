@@ -27,7 +27,7 @@ export async function responseProvider(request) {
 
         if (!/^https?:\/\//i.test(targetUrl)) targetUrl = 'https://' + targetUrl;
 
-        const wasmFunctionUrl = "https://bede2402-c4b7-4234-b17c-5e04fc46ef00.fwf.app";
+        const wasmFunctionUrl = request.getVariable('PMUSER_WASM_URL') ?? '';
 
         const wasmResponse = await httpRequest(wasmFunctionUrl, {
             method: 'GET',

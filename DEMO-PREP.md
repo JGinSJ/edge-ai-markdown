@@ -1,5 +1,7 @@
 # DEMO-PREP — Edge AI Markdown
 
+> **Note for contributors:** This guide is written for the hosted instance at `stopwaitingshipit.com`. The `demo-lock`/`demo-unlock` aliases and bucket references are specific to that deployment. If you're running your own instance, adapt these steps to your domain and origin storage.
+
 Run this checklist **10 minutes before** every customer call.
 
 ---

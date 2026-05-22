@@ -35,7 +35,7 @@ This POC is live at **https://stopwaitingshipit.com**.
 |---|---|
 | Domain registrar / DNS | GoDaddy (apex A records → Akamai edge IPs; `www` CNAME → `stopwaitingshipit.com.edgekey.net`) |
 | CDN / edge logic | Akamai property `stopwaitingshipit.com` (Dynamic Site Accelerator) |
-| EdgeWorker | `edgeworker-orchestrator/` v1.0.0 (ID `108291`) — traffic gatekeeper |
+| EdgeWorker | `edgeworker-orchestrator/` v1.1.0 (ID `108291`) — traffic gatekeeper |
 | Origin | Linode Object Storage bucket `serverless-ai-seo-pipeline` (region `us-ord-1`, static website hosting) |
 | TLS | Akamai CPS Enhanced TLS, SAN cert covering apex + www |
 | Compute | Fermyon Spin Wasm function at `https://bede2402-c4b7-4234-b17c-5e04fc46ef00.fwf.app` |
@@ -49,7 +49,7 @@ The Akamai property has a single `AI Bot Interception` child rule under the Defa
 ```
 edge-ai-markdown/
 ├── edgeworker-orchestrator/
-│   ├── main.js          # Akamai EdgeWorker (v1.0.0) — traffic gatekeeper
+│   ├── main.js          # Akamai EdgeWorker (v1.1.0) — traffic gatekeeper
 │   └── bundle.json      # EdgeWorker manifest
 ├── akamai-ai-markdown/
 │   ├── src/lib.rs       # Rust/Wasm HTTP component — fetches HTML, returns Markdown
@@ -62,7 +62,8 @@ edge-ai-markdown/
 │   ├── fixtures.json    # Customer/page index for the UI's selector
 │   ├── server.js        # Node.js demo server
 │   └── package.json     # Dependencies: tiktoken, turndown
-└── validate-edge-seo.sh # Legacy staging validation script
+├── .env.example         # Environment variable template
+└── demo-prep.sh         # Pre-demo smoke test script
 ```
 
 ---
@@ -145,6 +146,28 @@ The lockdown policy file (`~/.workharder/lockdown-policy.json`):
 }
 ```
 
+### Environment variables
+
+The demo UI reads the Fermyon endpoint from the environment:
+
+```bash
+cp .env.example .env
+# Edit .env and set WASM_URL to your Fermyon deployment URL
+```
+
+Then start the server as normal:
+
+```bash
+cd demo-ui
+AKAMAI_TARGET=production node server.js
+```
+
+The EdgeWorker reads the same URL from an Akamai property variable. In Control Center → your property → Property Variables, add:
+
+| Variable name | Value |
+|---|---|
+| `PMUSER_WASM_URL` | Your Fermyon deployment URL |
+
 ### Rebuilding the Wasm component (only if changing Rust code)
 
 ```bash
@@ -217,4 +240,4 @@ curl -sI -H "X-Verified-Bot: true" \
   | grep -iE "^HTTP|content-type|x-wasm"
 ```
 
-The legacy `validate-edge-seo.sh` script targets the older staging property at `cdi.connected-cloud.io.edgesuite-staging.net` and is retained for reference only.
+For staging, replace the hostname with `stopwaitingshipit.com.edgekey-staging.net` and add `-k` to skip certificate verification.
