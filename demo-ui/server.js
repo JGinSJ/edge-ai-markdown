@@ -99,6 +99,7 @@ function makeEdgeRequest(targetUrl, extraHeaders = {}) {
                     contentType:     res.headers['content-type']     || '',
                     xCache:          res.headers['x-cache']          || '',
                     xWasmExecution:  res.headers['x-wasm-execution'] || '',
+                    serverTiming:    res.headers['server-timing']    || '',
                     bodySize:        buf.length,
                     bodyPreview:     buf.toString('utf8', 0, 400).trim()
                 });
@@ -184,16 +185,10 @@ async function runTests(targetUrl, fixtureFile) {
         makeEdgeRequest(targetUrl),
         tokenPromise
     ]);
-    const testB = await makeEdgeRequest(targetUrl, {
-        'X-Verified-Bot': 'true',
-        'Pragma': 'akamai-x-cache-on'
-    });
+    const testB = await makeEdgeRequest(targetUrl, { 'X-Verified-Bot': 'true' });
     // Allow extra time for the edge cache to propagate before the cache-hit test.
     await new Promise(r => setTimeout(r, 2000));
-    const testC = await makeEdgeRequest(targetUrl, {
-        'X-Verified-Bot': 'true',
-        'Pragma': 'akamai-x-cache-on'
-    });
+    const testC = await makeEdgeRequest(targetUrl, { 'X-Verified-Bot': 'true' });
     return { testA, testB, testC, tokenData };
 }
 
@@ -670,7 +665,9 @@ function renderCard(id, t, scenario) {
     edgeRow = statRow('Edge Processing',
       t.xWasmExecution ? badge('Active', 'b-edge') : badge('Not Confirmed', 'b-miss'));
   } else if (scenario === 'c') {
-    var cHit = (t.xCache || '').toUpperCase().includes('HIT');
+    var cHit = (t.xCache || '').toUpperCase().includes('HIT') ||
+               ((t.serverTiming || '').toLowerCase().includes('cdn-cache') &&
+                (t.serverTiming || '').toLowerCase().includes('hit'));
     edgeRow = statRow('Edge Processing',
       t.xWasmExecution ? badge('Active', 'b-edge')
       : cHit             ? badge('Served from Cache', 'b-hit')
@@ -688,7 +685,7 @@ function renderCard(id, t, scenario) {
   document.getElementById(id).innerHTML =
     statRow('Response Time',  '<strong>' + t.responseTime + 'ms</strong>') +
     statRow('Content Format', ctBadge(t.contentType, scenario)) +
-    statRow('Cache Status',   cacheBadge(t.xCache, scenario)) +
+    statRow('Cache Status',   cacheBadge(t.xCache, t.serverTiming, scenario)) +
     edgeRow +
     statRow('Response Size',  fmtBytes(t.bodySize)) +
     preview;
@@ -712,10 +709,13 @@ function ctBadge(ct, scenario) {
   return badge(ct || 'unknown', 'b-bypass');
 }
 
-function cacheBadge(xc, scenario) {
+function cacheBadge(xc, st, scenario) {
   var v = (xc || '').toUpperCase();
-  if (v.includes('HIT'))  return badge('Served from Edge Cache', 'b-hit');
-  if (v.includes('MISS')) return badge('Cache Miss', 'b-miss');
+  var s = (st || '').toLowerCase();
+  var hit  = v.includes('HIT')  || (s.includes('cdn-cache') && s.includes('hit'));
+  var miss = v.includes('MISS') || (s.includes('cdn-cache') && s.includes('miss'));
+  if (hit)  return badge('Served from Edge Cache', 'b-hit');
+  if (miss) return badge('Cache Miss', 'b-miss');
   return scenario === 'a' ? badge('Human Traffic — Bypassed', 'b-bypass') : badge('Bypassed', 'b-bypass');
 }
 

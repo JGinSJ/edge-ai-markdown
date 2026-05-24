@@ -42,7 +42,10 @@ export async function responseProvider(request) {
             }, wasmResponse.body);
         } else {
             const err = await wasmResponse.text();
-            return createResponse(500, { 'X-Wasm-Execution': ['failed'] }, `Wasm Error: ${err}`);
+            return createResponse(500, {
+                'X-Wasm-Execution': ['failed'],
+                'Cache-Control':    ['no-store'],
+            }, `Wasm Error: ${err}`);
         }
 
     } catch (error) {
