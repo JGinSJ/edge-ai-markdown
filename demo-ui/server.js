@@ -58,7 +58,7 @@ function loadFixtureTokens(fixtureFile) {
         const htmlTokens     = countTokens(html);
         const markdownTokens = countTokens(markdown);
         if (!htmlTokens || !markdownTokens || htmlTokens / markdownTokens < 3) return null;
-        return { htmlTokens, markdownTokens, fromFixture: true };
+        return { htmlTokens, markdownTokens, htmlBytes: html.length, markdownBytes: markdown.length, fromFixture: true };
     } catch {
         return null;
     }
@@ -172,7 +172,7 @@ async function fetchTokenComparison(targetUrl) {
     // inline JavaScript (e.g. carrier device pages) produce html2md output nearly
     // as large as the source HTML — a 1.0× multiplier is misleading in a demo.
     if (!htmlTokens || !markdownTokens || htmlTokens / markdownTokens < 3) return null;
-    return { htmlTokens, markdownTokens };
+    return { htmlTokens, markdownTokens, htmlBytes: htmlResult.value.body.length, markdownBytes: wasmResult.value.body.length };
 }
 
 async function runTests(targetUrl, fixtureFile) {
@@ -588,9 +588,9 @@ function runPipeline() {
 }
 
 function renderResults(d) {
-  renderCard('body-a', d.testA, 'a');
-  renderCard('body-b', d.testB, 'b');
-  renderCard('body-c', d.testC, 'c');
+  renderCard('body-a', d.testA, 'a', d.tokenData);
+  renderCard('body-b', d.testB, 'b', d.tokenData);
+  renderCard('body-c', d.testC, 'c', d.tokenData);
 
   var bMarkdown = d.testB.contentType.includes('markdown');
   var cMarkdown = d.testC.contentType.includes('markdown');
@@ -654,7 +654,7 @@ function renderResults(d) {
   show('results');
 }
 
-function renderCard(id, t, scenario) {
+function renderCard(id, t, scenario, tokenData) {
   var isMarkdown = t.contentType.includes('markdown');
 
   // Edge Processing row for B and C only.
@@ -687,7 +687,10 @@ function renderCard(id, t, scenario) {
     statRow('Content Format', ctBadge(t.contentType, scenario)) +
     statRow('Cache Status',   cacheBadge(t.xCache, t.serverTiming, scenario)) +
     edgeRow +
-    statRow('Response Size',  fmtBytes(t.bodySize)) +
+    statRow('Response Size',
+      scenario === 'a' && tokenData && tokenData.htmlBytes   ? fmtBytes(tokenData.htmlBytes)   :
+      scenario !== 'a' && tokenData && tokenData.markdownBytes ? fmtBytes(tokenData.markdownBytes) :
+      fmtBytes(t.bodySize)) +
     preview;
 }
 
