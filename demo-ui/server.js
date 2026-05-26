@@ -205,7 +205,7 @@ const HTML = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Content Optimization — Akamai Live Demo</title>
+<title>AI Content Optimization — Akamai Demo</title>
 <style>
 /* Akamai brand palette (from brand-guidelines.pdf)
    Navy:   #002F6C  (RGB 0,47,108)
@@ -373,25 +373,25 @@ footer{text-align:center;padding:32px;color:#c0c8d0;font-size:12px}
     <div class="logo-mark">A</div>
     <span class="logo-name">Akamai</span>
   </div>
-  <div class="header-pill">AI Content Optimization &middot; Live Demo</div>
+  <div class="header-pill">AI Content Optimization &middot; Demo</div>
 </header>
 
 <div class="hero">
-  <div class="hero-hook">Live Demo</div>
+  <div class="hero-hook">Demo</div>
   <h1>Your Content, Optimized for AI &mdash; Automatically</h1>
   <p>Enter any URL below to see Akamai serve the right content to the right audience in real time: standard pages for your visitors, and AI-optimized content for search crawlers &mdash; all at the edge, with no changes to your website.</p>
 </div>
 
 <main>
   <div class="url-form">
-    <label for="target-url">Enter a website URL to run the live demo
+    <label for="target-url">Enter a website URL to run the demo
       <span class="url-hint">— try your own site, or use the default</span>
     </label>
     <div class="url-row">
       <input type="url" id="target-url" class="url-input"
              placeholder="https://www.akamai.com"
              value="https://www.akamai.com" />
-      <button class="run-btn" id="run-btn" onclick="runPipeline()">&#9654;&nbsp; Run Live Demo</button>
+      <button class="run-btn" id="run-btn" onclick="runPipeline()">&#9654;&nbsp; Run Demo</button>
     </div>
   </div>
 
@@ -407,7 +407,7 @@ footer{text-align:center;padding:32px;color:#c0c8d0;font-size:12px}
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <div class="loading-label">Running live demo&hellip;</div>
+    <div class="loading-label">Running demo&hellip;</div>
     <p id="loading-msg">Starting up&hellip;</p>
   </div>
 
@@ -485,7 +485,7 @@ footer{text-align:center;padding:32px;color:#c0c8d0;font-size:12px}
   </div>
 </main>
 
-<footer>Akamai Technologies &nbsp;&middot;&nbsp; AI Content Optimization &nbsp;&middot;&nbsp; Live Demo</footer>
+<footer>Akamai Technologies &nbsp;&middot;&nbsp; AI Content Optimization &nbsp;&middot;&nbsp; Demo</footer>
 
 <script>
 var running = false;
